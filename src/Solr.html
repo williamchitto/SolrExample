@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Solr</title>
+<style>
+body {
+	background-color: #EEE9E9;
+}
+
+div {
+	width: auto;
+	border: 1px solid #ccc;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 3px;
+}
+
+#rs {
+	width: 600px;
+	margin: 0 auto;
+	background-color: #BEBEBE;
+}
+
+#rs div {
+	background-color: #D3D3D3;
+	margin-top: 7px;
+}
+
+#form {
+	width: 600px;
+	margin: 0 auto;
+	background-color: #BEBEBE;
+}
+
+h1 {
+	text-align: center;
+}
+
+#botao {
+	width: 600px;
+	margin: 0 auto;
+	background-color: #BEBEBE;
+}
+
+#botao input[type="button"] {
+	margin: 0;
+	margin-left: -4px;
+	width: 30px;
+	height: 30px;
+	font-size: 8pt;
+}
+</style>
+</head>
+<body>
+	<h1>Busca Documentos</h1>
+	<br>
+	<div id="form">
+		Busca: <input type="text" name="busca" onkeypress="return enter()"
+			size="85" /> 
+			</br> 
+			Titulo: <input type="text" name="titulo"			onkeypress="return enter()" size="18" /> Album: <input type="text"
+			name="album" onkeypress="return enter()" size="18" /> Artista: <input
+			type="text" name="artista" onkeypress="return enter()" size="18" />
+		<br> <input type="button" onclick="pesquisa(1)" value="Pesquisar">
+	</div>
+	<br>
+	<div id="botao" style="display: none"></div>
+	<div id="rs"></div>
+</body>
+<script src="jquery.js"></script>
+<script type='text/javascript'>
+		
+		var divResultados = document.getElementById('rs');
+		
+		var divBotao = document.getElementById('botao');
+		
+		var resultadosPorPagina = 5;
+		function pesquisa(numero)
+		{
+		var query = "*:*";
+		var inicio = (numero-1) * resultadosPorPagina;
+	
+		if(jQuery("input[name=busca]").val()!="")
+		query = jQuery("input[name=busca]").val();
+
+		if(jQuery("input[name=titulo]").val()!="")
+		query = "titulo:"+jQuery("input[name=titulo]").val();
+		
+		if(jQuery("input[name=album]").val()!="")
+		query = "album:"+jQuery("input[name=album]").val();
+		
+		if(jQuery("input[name=artista]").val()!="")
+		query = "artista:"+jQuery("input[name=artista]").val();
+		
+		
+		var url = "http://localhost:8983/solr/select/?q="+query+"&start="+inicio+"&rows=5&wt=json&json.wrf=?&indent=true";
+		limparResultados();
+		$.getJSON(url, function(result){
+				exibirDetalhesBuscar(result);
+				criarPaginacao(result);
+				for (var i = 0; i < result.response.docs.length; i++) {
+					var thisResult = "<a>" + result.response.docs[i].title + "</a><br>";
+					thisResult+= "<b>Autor: </b>" + result.response.docs[i].author ;
+					thisResult+=  " - <b>Conteudo: </b> " + result.response.docs[i].content.substring(0,200);
+					var resultadoDiv = document.createElement("div");
+					resultadoDiv.innerHTML = thisResult;
+					divResultados.appendChild(resultadoDiv);
+				}
+				
+		});
+		
+		}
+				
+		function exibirDetalhesBuscar(result)
+		{
+			var encontrados = "Resultados Encontrados: " + result.response.numFound + " (" + result.responseHeader.QTime  + " milisegundos) ";
+			var paragrafoDetalhes = document.createElement("p");
+			paragrafoDetalhes.innerHTML = encontrados;
+			divResultados.appendChild(paragrafoDetalhes);
+		}
+		
+		function criarPaginacao(result)
+		{ 	
+			var paginas = result.response.numFound/ resultadosPorPagina;
+			var resu = "";
+			for(var i=1;i<paginas+1;i++)
+			{
+				resu += '<input type="button" onclick="pesquisa('+i+')" value="'+i+'">';
+			}
+			$("#botao").html('');
+			jQuery(divBotao).html(resu);
+			if(paginas>0)
+				$("#botao").show();
+		}
+		function limparResultados()
+		{
+			jQuery(divResultados).html('');
+			$("#botao").hide();
+		}
+		
+		function enter() {  
+			if(window.event && window.event.keyCode == 13)
+			{  
+				pesquisa(1);
+				return false; 
+			}else {
+				return true; 
+			}  
+		}
+	</script>
+</html>
