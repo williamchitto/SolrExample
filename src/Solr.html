@@ -19,7 +19,7 @@ div {
 }
 
 #rs {
-	width: 600px;
+	width: 800px;
 	margin: 0 auto;
 	background-color: #BEBEBE;
 }
@@ -30,7 +30,7 @@ div {
 }
 
 #form {
-	width: 600px;
+	width: 800px;
 	margin: 0 auto;
 	background-color: #BEBEBE;
 }
@@ -40,7 +40,7 @@ h1 {
 }
 
 #botao {
-	width: 600px;
+	width: 800px;
 	margin: 0 auto;
 	background-color: #BEBEBE;
 }
@@ -96,7 +96,7 @@ h1 {
 		query = "artista:"+jQuery("input[name=artista]").val();
 		
 		
-		var url = "http://localhost:8983/solr/select/?q="+query+"&start="+inicio+"&rows=5&wt=json&json.wrf=?&indent=true";
+		var url = "http://localhost:8983/solr/select/?q="+query+"&start="+inicio+"&rows="+resultadosPorPagina+"&wt=json&json.wrf=?&indent=true";
 		limparResultados();
 		$.getJSON(url, function(result){
 				exibirDetalhesBuscar(result);
